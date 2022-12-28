@@ -18,6 +18,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
   const userCollections = client.db("mini-media").collection("users");
+  const PostCollections = client.db("mini-media").collection("posts");
   try {
     // saved user info
     app.post("/user", async (req, res) => {
@@ -30,6 +31,20 @@ async function run() {
       const query = { email: email };
       const users = await userCollections.findOne(query);
       res.send(users);
+    });
+
+    //create and get post
+    app.post("/createPost", async (req, res) => {
+      const post = req.body;
+      post.date = new Date();
+      const newPost = await PostCollections.insertOne(post);
+      res.send(newPost);
+    });
+
+    app.get("/posts", async (req, res) => {
+      const query = {};
+      const allPosts = await PostCollections.find(query).toArray();
+      res.send(allPosts);
     });
   } finally {
   }
