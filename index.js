@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 
@@ -33,6 +33,29 @@ async function run() {
       res.send(users);
     });
 
+    // update user info
+    app.put("/editAbout/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const update = req.body;
+      console.log(update);
+
+      const option = { upsert: true };
+      const updateAbout = {
+        $set: {
+          name: update.name,
+          email: update.email,
+          photoURL: update.photoURL,
+        },
+      };
+      const result = await userCollections.updateOne(
+        filter,
+        updateAbout,
+        option
+      );
+      console.log(result);
+      res.send(result);
+    });
     //create and get post
     app.post("/createPost", async (req, res) => {
       const post = req.body;
@@ -45,6 +68,14 @@ async function run() {
       const query = {};
       const allPosts = await PostCollections.find(query).toArray();
       res.send(allPosts);
+    });
+
+    //post details
+    app.get("/details/:id", async (req, res) => {
+      const id = req.params.id;
+      const details = { _id: ObjectId(id) };
+      const result = await PostCollections.findOne(details);
+      res.send(result);
     });
   } finally {
   }
